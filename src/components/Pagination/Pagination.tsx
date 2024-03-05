@@ -12,7 +12,7 @@ interface PaginationProps {
 export default function Pagination({ queryConfig, pageSize }: PaginationProps) {
   const navigate = useNavigate()
 
-  const [itemOffset, setItemOffset] = useState(0)
+  const [_, setItemOffset] = useState(0)
   const [pageCount, setPageCount] = useState<number>(0)
 
   useEffect(() => {

@@ -10,6 +10,7 @@ interface AsideFilterProps {
 }
 
 export default function AsideFilter({ pageSize, queryConfig }: AsideFilterProps) {
+  console.log('🐻 ~ AsideFilter ~ pageSize:', pageSize, queryConfig)
   return (
     <div className='py-4'>
       <Link to={path.home} className='flex items-center font-bold'>
