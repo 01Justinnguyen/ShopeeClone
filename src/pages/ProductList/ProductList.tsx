@@ -8,6 +8,7 @@ import AsideFilter from './AsideFilter'
 import Product from './Product'
 import SortProductList from './SortProductList'
 import Pagination from '@/components/Pagination/Pagination'
+import CategoryApi from '@/api/category.api'
 
 export type QueryConfig = {
   [key in keyof ProductListConfig]: string
@@ -31,31 +32,38 @@ export default function ProductList() {
     isUndefined
   )
 
-  const { data } = useQuery({
-    queryKey: ['product', queryParams],
+  const { data: ProductData } = useQuery({
+    queryKey: ['product', queryConfig],
     queryFn: () => ProductApi.getProducts(queryConfig as ProductListConfig),
+    placeholderData: keepPreviousData
+  })
+
+  const { data: CategoriesData } = useQuery({
+    queryKey: ['category'],
+    queryFn: () => CategoryApi.getCategories(),
     placeholderData: keepPreviousData
   })
 
   return (
     <div className='py-6 bg-gray-200'>
       <div className='container'>
-        {data && (
+        {ProductData && (
           <div className='grid grid-cols-12 gap-6'>
             <div className='col-span-3'>
               <AsideFilter
+                categoriesData={CategoriesData?.data.data || []}
                 queryConfig={queryConfig}
-                pageSize={data && (data.data.data.pagination.page_size as number)}
+                pageSize={ProductData && (ProductData.data.data.pagination.page_size as number)}
               />
             </div>
             <div className='col-span-9'>
               <SortProductList
                 queryConfig={queryConfig}
-                pageSize={data && (data.data.data.pagination.page_size as number)}
+                pageSize={ProductData && (ProductData.data.data.pagination.page_size as number)}
               />
               <div className='grid grid-cols-2 gap-3 mt-6 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'>
                 {React.Children.toArray(
-                  data.data.data.products.map((product) => (
+                  ProductData.data.data.products.map((product) => (
                     <div className='col-span-1'>
                       <Product product={product} />
                     </div>
@@ -64,7 +72,7 @@ export default function ProductList() {
               </div>
               <Pagination
                 queryConfig={queryConfig}
-                pageSize={data && (data.data.data.pagination.page_size as number)}
+                pageSize={ProductData && (ProductData.data.data.pagination.page_size as number)}
               />
             </div>
           </div>
