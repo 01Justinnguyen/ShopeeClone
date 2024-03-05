@@ -1,0 +1,282 @@
+/* eslint-disable import/no-unresolved */
+import { Link } from 'react-router-dom'
+import CartLogo from '@/assets/cart-logo.svg?react'
+import FindIcon from '@/assets/find-icon.svg?react'
+import FaceBookLogo from '@/assets/logo-facebook.svg?react'
+import InstagramLogo from '@/assets/logo-instagram.svg?react'
+import Logo from '@/assets/logo.svg?react'
+import GlobalLogo from '@/assets/global-logo.svg?react'
+import ArrowDown from '@/assets/arrow-down.svg?react'
+import Popover from '../Popover'
+import { useAppContext } from '@/contexts/app.context'
+import { toast } from 'react-toastify'
+import { useMutation } from '@tanstack/react-query'
+
+import path from '@/constants/path'
+import Button from '../Button'
+import AuthApi from '@/api/auth.api'
+
+export default function Header() {
+  const { isAuthenticated, setIsAuthenticated, profile, setProfile } = useAppContext()
+
+  const logoutMutation = useMutation({
+    mutationFn: AuthApi.logout,
+    onSuccess: () => {
+      setIsAuthenticated(false)
+      setProfile(null)
+      toast.success('Đã đăng xuất')
+    }
+  })
+
+  const handleLogout = () => {
+    logoutMutation.mutate()
+  }
+
+  return (
+    <div className='pt-2 pb-5 bg-[linear-gradient(-180deg,#f53d2d,#f63)] text-white'>
+      <div className='container'>
+        <div className='flex items-center justify-between'>
+          <div className='flex items-end gap-x-2'>
+            <span className='text-xs cursor-pointer hover:text-gray-300'>Tải ứng dụng</span>
+
+            <div className='h-4 border border-[#f96c5c]'></div>
+
+            <div className='flex text-sm'>
+              <span className='mr-1 text-xs hover:text-gray-300'>Kết nối</span>
+              <div className='flex items-end gap-x-2'>
+                <Link to={'https://www.facebook.com/'}>
+                  <FaceBookLogo className='w-4 h-4 cursor-pointer fill-white hover:fill-slate-200' />
+                </Link>
+                <Link to={'https://www.instagram.com/'}>
+                  <InstagramLogo className='w-4 h-4 cursor-pointer fill-white hover:fill-slate-200' />
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          <div className='flex items-center gap-x-3'>
+            <Popover
+              className='flex items-center py-1 cursor-pointer hover:text-gray-300'
+              as={'span'}
+              renderPopoverParent={
+                <>
+                  <GlobalLogo className='w-4 h-4' />
+                  <span className='mx-[3px] text-xs'>Tiếng việt</span>
+                  <ArrowDown className='w-[14px] h-[14px]' />
+                </>
+              }
+            >
+              <div className='bg-white border border-gray-200 border-none rounded-sm shadow-md'>
+                <div className='flex flex-col px-3 py-1 pr-24'>
+                  <button className='px-2 py-1 text-[14px] hover:text-orange'>Tiếng Việt</button>
+                  <button className='px-2 py-1 mt-2 text-[14px] hover:text-orange'>EngLish</button>
+                </div>
+              </div>
+            </Popover>
+
+            {isAuthenticated ? (
+              <Popover
+                className='flex items-center py-1 cursor-pointer hover:text-gray-300'
+                renderPopoverParent={
+                  <>
+                    <div className='flex-shrink-0 w-4 h-4 mr-2 '>
+                      <img
+                        src='https://avatars.githubusercontent.com/u/87435674?v=4'
+                        alt=''
+                        className='object-cover w-full h-full rounded-full'
+                      />
+                    </div>
+                    <span className='text-xs'>{profile?.email}</span>
+                  </>
+                }
+              >
+                <div className='overflow-hidden rounded-sm shadow-lg'>
+                  <Link
+                    to={path.profile}
+                    className='block w-full px-3 py-2 text-[14px] bg-white hover:bg-slate-100 hover:text-cyan-500'
+                  >
+                    Tài khoản của tôi
+                  </Link>
+                  <Link
+                    to={path.home}
+                    className='block w-full px-3 py-2 text-[14px] bg-white hover:bg-slate-100 hover:text-cyan-500'
+                  >
+                    Đơn mua
+                  </Link>
+                  <Button
+                    disabled={logoutMutation.isPending}
+                    onClick={() => handleLogout()}
+                    className='block w-full px-3 py-2 text-[14px] text-left bg-white hover:bg-slate-100 hover:text-cyan-500'
+                  >
+                    Đăng xuất
+                  </Button>
+                </div>
+              </Popover>
+            ) : (
+              <div className='flex items-center gap-x-2'>
+                <Link to={path.login} className='text-xs cursor-pointer hover:text-gray-300'>
+                  Đăng nhập
+                </Link>
+                <div className='h-4 border border-[#f96c5c]'></div>
+                <Link to={path.register} className='text-xs cursor-pointer hover:text-gray-300'>
+                  Đăng ký
+                </Link>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className='grid items-end grid-cols-12 gap-4 mt-4'>
+          <Link to={path.home} className='col-span-2'>
+            <Logo className='h-7 lg:h-11 fill-white' />
+          </Link>
+          <form className='col-span-9'>
+            <div className='flex p-1 bg-white rounded-sm'>
+              <input
+                type='text'
+                name='search'
+                className='flex-grow px-3 py-2 text-sm text-black bg-transparent border-none outline-none'
+                placeholder='Shopee bao ship 0Đ - Đăng ký ngay!'
+              />
+              <Link to={path.home} className='flex-shrink-0 px-6 py-2 rounded-sm bg-orange hover:bg-orange/90'>
+                <FindIcon className='w-4 h-4' />
+              </Link>
+            </div>
+          </form>
+          <Popover
+            className='items-end col-span-1 text-center'
+            renderPopoverParent={
+              <Link to={path.cart} className='inline-block '>
+                <CartLogo className='w-7 h-7' />
+              </Link>
+            }
+          >
+            {isAuthenticated ? (
+              <div className='relative text-xs bg-white border-gray-200 border-none rounded-sm shadow-md'>
+                <>
+                  <div className='flex items-center text-gray-400 h-10 pl-[10px] capitalize'>Sản Phẩm Mới Thêm</div>
+                  <div className=''>
+                    <Link to={'/'} className='flex p-[10px] cursor-pointer hover:bg-slate-100'>
+                      <div className='flex-shrink-0'>
+                        <img
+                          src='https://avatars.githubusercontent.com/u/87435674?v=4'
+                          alt='product'
+                          className='object-cover w-10 h-10'
+                        />
+                      </div>
+                      <div className='flex-grow ml-2 overflow-hidden'>
+                        <div className='truncate'>
+                          Beam Transporter GFT60T3B106-13 Bộ giảm tốc hành trình-GFT60T3B106-15 trình
+                        </div>
+                        <span className='text-sm text-gray-400'>x2</span>
+                      </div>
+
+                      <div className='flex-shrink-0 ml-2'>
+                        <span className='text-orange'>₫115.709.000</span>
+                      </div>
+                    </Link>
+                    <div className='flex p-[10px] cursor-pointer hover:bg-slate-100'>
+                      <div className='flex-shrink-0'>
+                        <img
+                          src='https://avatars.githubusercontent.com/u/87435674?v=4'
+                          alt='product'
+                          className='object-cover w-10 h-10'
+                        />
+                      </div>
+                      <div className='flex-grow ml-2 overflow-hidden'>
+                        <div className='truncate'>
+                          Beam Transporter GFT60T3B106-13 Bộ giảm tốc hành trình-GFT60T3B106-15 trình
+                        </div>
+                        <span className='text-sm text-gray-400'>x2</span>
+                      </div>
+
+                      <div className='flex-shrink-0 ml-2'>
+                        <span className='text-orange'>₫115.709.000</span>
+                      </div>
+                    </div>
+                    <div className='flex p-[10px] cursor-pointer hover:bg-slate-100'>
+                      <div className='flex-shrink-0'>
+                        <img
+                          src='https://avatars.githubusercontent.com/u/87435674?v=4'
+                          alt='product'
+                          className='object-cover w-10 h-10'
+                        />
+                      </div>
+                      <div className='flex-grow ml-2 overflow-hidden'>
+                        <div className='truncate'>
+                          Beam Transporter GFT60T3B106-13 Bộ giảm tốc hành trình-GFT60T3B106-15 trình
+                        </div>
+                        <span className='text-sm text-gray-400'>x2</span>
+                      </div>
+
+                      <div className='flex-shrink-0 ml-2'>
+                        <span className='text-orange'>₫115.709.000</span>
+                      </div>
+                    </div>
+                    <div className='flex p-[10px] cursor-pointer hover:bg-slate-100'>
+                      <div className='flex-shrink-0'>
+                        <img
+                          src='https://avatars.githubusercontent.com/u/87435674?v=4'
+                          alt='product'
+                          className='object-cover w-10 h-10'
+                        />
+                      </div>
+                      <div className='flex-grow ml-2 overflow-hidden'>
+                        <div className='truncate'>
+                          Beam Transporter GFT60T3B106-13 Bộ giảm tốc hành trình-GFT60T3B106-15 trình
+                        </div>
+                        <span className='text-sm text-gray-400'>x2</span>
+                      </div>
+
+                      <div className='flex-shrink-0 ml-2'>
+                        <span className='text-orange'>₫115.709.000</span>
+                      </div>
+                    </div>
+                    <div className='flex p-[10px] cursor-pointer hover:bg-slate-100'>
+                      <div className='flex-shrink-0'>
+                        <img
+                          src='https://avatars.githubusercontent.com/u/87435674?v=4'
+                          alt='product'
+                          className='object-cover w-10 h-10'
+                        />
+                      </div>
+                      <div className='flex-grow ml-2 overflow-hidden'>
+                        <div className='truncate'>
+                          Beam Transporter GFT60T3B106-13 Bộ giảm tốc hành trình-GFT60T3B106-15 trình
+                        </div>
+                        <span className='text-sm text-gray-400'>x2</span>
+                      </div>
+
+                      <div className='flex-shrink-0 ml-2'>
+                        <span className='text-orange'>₫115.709.000</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className='flex items-center justify-between mt-6 px-[10px] pb-[10px]'>
+                    <div className='text-xs text-gray-400 capitalize'>
+                      <span>28</span> Thêm vào giỏ hàng
+                    </div>
+                    <button className='hover:opacity-95 transition-all py-2 text-white capitalize px-[15px] bg-orange'>
+                      Xem giỏ hàng
+                    </button>
+                  </div>
+                </>
+              </div>
+            ) : (
+              <div className='text-center min-w-[400px] bg-white py-[100px]'>
+                <div
+                  className='inline-block w-[100px] h-[100px] bg-cover bg-center bg-no-repeat '
+                  style={{
+                    backgroundImage:
+                      'url("https://deo.shopeemobile.com/shopee/shopee-pcmall-live-sg/assets/9bdd8040b334d31946f49e36beaf32db.png")'
+                  }}
+                ></div>
+                <h3 className='font-normal'>Chưa có sản phẩm</h3>
+              </div>
+            )}
+          </Popover>
+        </div>
+      </div>
+    </div>
+  )
+}

@@ -1,0 +1,29 @@
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+
+.pagination .selected a {
+  @apply text-orange bg-slate-100;
+}
+
+.pagination li:not(:last-child, :first-child) a {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  display: block;
+}
+
+.pagination li:not(:last-child, :first-child) a:hover {
+  @apply bg-slate-200;
+}
+
+.pagination li.previous:hover {
+  @apply scale-105;
+}
+
+.pagination li.next:hover {
+  @apply scale-105;
+}
