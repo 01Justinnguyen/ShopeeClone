@@ -1,7 +1,7 @@
 import Button from '@/components/Button'
 import path from '@/constants/path'
 import { Link, createSearchParams, useNavigate } from 'react-router-dom'
-import { QueryConfig } from '../ProductList'
+import { QueryConfig } from '../../ProductList'
 import { Category } from '@/types/category.type'
 import classNames from 'classnames'
 import InputNumber from '@/components/Input/InputNumber'
@@ -10,7 +10,7 @@ import { Schema, schema } from '@/utils/rules'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { NoUndefinedField } from '@/types/utils.types'
 import { ObjectSchema } from 'yup'
-import RatingStars from '../RatingStars'
+import RatingStars from './RatingStars'
 import { omit } from 'lodash'
 
 interface AsideFilterProps {

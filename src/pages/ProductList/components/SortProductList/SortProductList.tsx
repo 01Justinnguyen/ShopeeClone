@@ -1,5 +1,5 @@
 import path from '@/constants/path'
-import { QueryConfig } from '../ProductList'
+import { QueryConfig } from '../../ProductList'
 import { order as orderConstant, sortBy } from '@/constants/product'
 import { ProductListConfig } from '@/types/product.type'
 import classNames from 'classnames'
