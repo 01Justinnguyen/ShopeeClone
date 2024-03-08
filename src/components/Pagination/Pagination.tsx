@@ -1,6 +1,6 @@
 import path from '@/constants/path'
 import { QueryConfig } from '@/pages/ProductList/ProductList'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import ReactPaginate from 'react-paginate'
 import { createSearchParams, useNavigate } from 'react-router-dom'
 import './style.css'
@@ -11,7 +11,8 @@ interface PaginationProps {
 }
 export default function Pagination({ queryConfig, pageSize }: PaginationProps) {
   const navigate = useNavigate()
-
+  const { page } = queryConfig
+  console.log('🐻 ~ Pagination ~ page:', page)
   const [_, setItemOffset] = useState(0)
   const [pageCount, setPageCount] = useState<number>(0)
 
@@ -20,17 +21,67 @@ export default function Pagination({ queryConfig, pageSize }: PaginationProps) {
     setPageCount(pageSize)
   }, [pageSize])
 
-  const handlePageClick = (event: any) => {
-    const newOffset = (event.selected * Number(queryConfig.limit)) % 20
-    setItemOffset(newOffset)
-    navigate({
-      pathname: path.home,
-      search: createSearchParams({
-        ...queryConfig,
-        page: (event.selected + 1).toString()
-      }).toString()
-    })
-  }
+  // const handlePageClick = useEffect((event: any) => {
+  //   console.log('page handle', page)
+  //   const newOffset = (event.selected * Number(queryConfig.limit)) % 20
+  //   setItemOffset(newOffset)
+  //   navigate({
+  //     pathname: path.home,
+  //     search: createSearchParams({
+  //       ...queryConfig,
+  //       page: String(event.selected + 1)
+  //     }).toString()
+  //   })
+  // },
+  // [page])
+
+  // const handlePageChange = useCallback(
+  //   (event: any) => {
+  //     console.log('page handle', page)
+  //     const newOffset = (event.selected * Number(queryConfig.limit)) % 20
+  //     setItemOffset(newOffset)
+  //     navigate({
+  //       pathname: path.home,
+  //       search: createSearchParams({
+  //         ...queryConfig,
+  //         page: String(event.selected + 1)
+  //       }).toString()
+  //     })
+  //   },
+  //   [page]
+  // )
+
+  // const handlePageClick = useCallback(
+  //   (event: any) => {
+  //     const newOffset = (event.selected * Number(queryConfig.limit)) % 20
+  //     setItemOffset(newOffset)
+  //     navigate({
+  //       pathname: path.home,
+  //       search: createSearchParams({
+  //         ...queryConfig,
+  //         page: String(event.selected + 1)
+  //       }).toString()
+  //     })
+  //   },
+  //   [page, queryConfig, navigate]
+  // )
+
+  const handlePageClick = useCallback(
+    (event: any) => {
+      console.log('🐻 ~ Pagination ~ event:', event)
+      const newOffset = (event.selected * Number(queryConfig.limit)) % 20
+      setItemOffset(newOffset)
+      navigate({
+        pathname: path.home,
+        search: createSearchParams({
+          ...queryConfig,
+          page: String(event.selected + 1)
+        }).toString()
+      })
+    },
+    [queryConfig, navigate]
+  )
+
   return (
     <div className='mt-4'>
       <ReactPaginate
