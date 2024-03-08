@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import Input from '@/components/Input'
-import { RegisterType, schema } from '@/utils/rules'
+import { Schema, schema } from '@/utils/rules'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { useMutation } from '@tanstack/react-query'
 import AuthApi from '@/api/auth.api'
@@ -13,7 +13,9 @@ import { toast } from 'react-toastify'
 import Button from '@/components/Button'
 import path from '@/constants/path'
 
-type FormData = RegisterType
+type FormData = Pick<Schema, 'email' | 'password' | 'confirm_password'>
+
+export const registerSchema = schema.pick(['email', 'password', 'confirm_password'])
 
 export default function Register() {
   const { setIsAuthenticated, setProfile } = useAppContext()
@@ -24,7 +26,7 @@ export default function Register() {
     setError,
     formState: { errors }
   } = useForm<FormData>({
-    resolver: yupResolver(schema)
+    resolver: yupResolver(registerSchema)
   })
 
   const registerAccountMutation = useMutation({

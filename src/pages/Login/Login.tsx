@@ -8,11 +8,13 @@ import AuthApi from '@/api/auth.api'
 import Button from '@/components/Button'
 import Input from '@/components/Input'
 import { useAppContext } from '@/contexts/app.context'
-import { LoginType, loginSchema } from '@/utils/rules'
+import { Schema, schema } from '@/utils/rules'
 import { isAxiosUnprocessableEntityErrors } from '@/utils/utils'
 import path from '@/constants/path'
 
-type FormData = LoginType
+type FormData = Pick<Schema, 'email' | 'password'>
+
+const loginSchema = schema.pick(['email', 'password'])
 
 export default function Login() {
   const { setIsAuthenticated, setProfile } = useAppContext()
