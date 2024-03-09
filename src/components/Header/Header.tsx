@@ -263,7 +263,7 @@ export default function Header() {
                 </>
               </div>
             ) : (
-              <div className='text-center min-w-[400px] bg-white py-[100px]'>
+              <div className='text-center min-w-[400px] bg-white py-[100px] shadow-lg rounded-sm border-none'>
                 <div
                   className='inline-block w-[100px] h-[100px] bg-cover bg-center bg-no-repeat '
                   style={{

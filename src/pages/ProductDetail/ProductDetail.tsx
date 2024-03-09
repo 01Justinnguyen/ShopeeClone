@@ -5,6 +5,13 @@ import { formatCurrency, formatNumberToSocialStyle, rateSale } from '@/utils/uti
 import { useQuery } from '@tanstack/react-query'
 import DOMPurify from 'dompurify'
 import { useParams } from 'react-router-dom'
+import ChevronLeft from '@/assets/chevron-left.svg?react'
+import ChevronRight from '@/assets/chevron-right.svg?react'
+import CartIcon from '@/assets/cart-icon.svg?react'
+import MinusIcon from '@/assets/minus-icon.svg?react'
+import PlusIcon from '@/assets/plus-icon.svg?react'
+import { useEffect, useMemo, useState } from 'react'
+import { Product } from '@/types/product.type'
 
 export default function ProductDetail() {
   const { id } = useParams()
@@ -12,40 +19,65 @@ export default function ProductDetail() {
     queryKey: ['product', id],
     queryFn: () => ProductApi.getProductDetail(id as string)
   })
+
+  const [currentIndexImages, setCurrentIndexImages] = useState<number[]>([0, 5])
+  const [activeImage, setActiveImage] = useState<string>('')
   const product = productDetailData?.data.data
+
+  const currentImages = useMemo(
+    () => (product ? product.images.slice(...currentIndexImages) : []),
+    [product, currentIndexImages]
+  )
+
+  useEffect(() => {
+    if (product && product.images.length > 0) {
+      setActiveImage(product.images[0])
+    }
+  }, [product])
+
+  const next = () => {
+    if (currentIndexImages[1] < (product as Product).images.length) {
+      setCurrentIndexImages((prev) => [prev[0] + 1, prev[1] + 1])
+    }
+  }
+
+  const prev = () => {
+    if (currentIndexImages[0] > 0) {
+      setCurrentIndexImages((prev) => [prev[0] - 1, prev[1] - 1])
+    }
+  }
+
+  const chooseActive = (img: string) => {
+    setActiveImage(img)
+  }
+
   if (!product) return null
   return (
     <div className='py-6 bg-gray-200'>
-      <div className='p-4 bg-white shadow'>
-        <div className='container'>
+      <div className='container'>
+        <div className='p-4 bg-white rounded-lg shadow'>
           <div className='grid grid-cols-12 gap-9'>
             <div className='col-span-5'>
               <div className='relative w-full pt-[100%] shadow'>
                 <img
-                  src={product.image}
+                  src={activeImage}
                   alt={product.name}
                   className='absolute top-0 left-0 object-cover w-full h-full bg-white'
                 />
               </div>
               <div className='relative grid grid-cols-5 gap-1 mt-4'>
-                <button className='absolute left-0 z-10 w-5 text-white -translate-y-1/2 top-1/2 h-9 bg-black/20'>
-                  <svg
-                    xmlns='http://www.w3.org/2000/svg'
-                    fill='none'
-                    viewBox='0 0 24 24'
-                    strokeWidth={1.5}
-                    stroke='currentColor'
-                    className='w-5 h-5'
-                  >
-                    <path strokeLinecap='round' strokeLinejoin='round' d='M15.75 19.5L8.25 12l7.5-7.5' />
-                  </svg>
+                <button
+                  onClick={prev}
+                  className='absolute left-0 z-10 w-5 text-white -translate-y-1/2 top-1/2 h-9 bg-black/20'
+                >
+                  <ChevronLeft className='w-5 h-5' />
                 </button>
-                {product.images.slice(0, 5).map((img, index) => {
-                  const isActive = index === 0
+                {currentImages.map((img) => {
+                  const isActive = img === activeImage
                   return (
-                    <div className='relative w-full pt-[100%]' key={img}>
+                    <div className='relative w-full pt-[100%]' key={img} onMouseEnter={() => chooseActive(img)}>
                       <img
-                        src={product.image}
+                        src={img}
                         alt={product.name}
                         className='absolute top-0 left-0 object-cover w-full h-full bg-white cursor-pointer'
                       />
@@ -53,17 +85,11 @@ export default function ProductDetail() {
                     </div>
                   )
                 })}
-                <button className='absolute right-0 z-10 w-5 text-white -translate-y-1/2 top-1/2 h-9 bg-black/20'>
-                  <svg
-                    xmlns='http://www.w3.org/2000/svg'
-                    fill='none'
-                    viewBox='0 0 24 24'
-                    strokeWidth={1.5}
-                    stroke='currentColor'
-                    className='w-5 h-5'
-                  >
-                    <path strokeLinecap='round' strokeLinejoin='round' d='M8.25 4.5l7.5 7.5-7.5 7.5' />
-                  </svg>
+                <button
+                  onClick={next}
+                  className='absolute right-0 z-10 w-5 text-white -translate-y-1/2 top-1/2 h-9 bg-black/20'
+                >
+                  <ChevronRight className='w-5 h-5' />
                 </button>
               </div>
             </div>
@@ -99,16 +125,7 @@ export default function ProductDetail() {
                 <div className='text-gray-500 capitalize'>Số lượng</div>
                 <div className='flex items-center ml-10'>
                   <button className='flex items-center justify-center w-8 h-8 text-gray-600 border border-gray-300 rounded-l-sm'>
-                    <svg
-                      xmlns='http://www.w3.org/2000/svg'
-                      fill='none'
-                      viewBox='0 0 24 24'
-                      strokeWidth={1.5}
-                      stroke='currentColor'
-                      className='w-4 h-4'
-                    >
-                      <path strokeLinecap='round' strokeLinejoin='round' d='M19.5 12h-15' />
-                    </svg>
+                    <MinusIcon className='w-4 h-4' />
                   </button>
                   <InputNumber
                     value={1}
@@ -117,45 +134,14 @@ export default function ProductDetail() {
                     classNameInput='h-8 w-14 border-t border-b border-gray-300 p-1 text-center outline-none'
                   />
                   <button className='flex items-center justify-center w-8 h-8 text-gray-600 border border-gray-300 rounded-r-sm'>
-                    <svg
-                      xmlns='http://www.w3.org/2000/svg'
-                      fill='none'
-                      viewBox='0 0 24 24'
-                      strokeWidth={1.5}
-                      stroke='currentColor'
-                      className='w-4 h-4'
-                    >
-                      <path strokeLinecap='round' strokeLinejoin='round' d='M12 4.5v15m7.5-7.5h-15' />
-                    </svg>
+                    <PlusIcon className='w-4 h-4' />
                   </button>
                 </div>
                 <div className='ml-6 text-sm text-gray-500'>{product.quantity} sản phẩm có sẵn</div>
               </div>
               <div className='flex items-center mt-8'>
                 <button className='flex items-center justify-center h-12 px-5 capitalize border rounded-sm shadow-sm border-orange bg-orange/10 text-orange hover:bg-orange/5'>
-                  <svg
-                    enableBackground='new 0 0 15 15'
-                    viewBox='0 0 15 15'
-                    x={0}
-                    y={0}
-                    className='mr-[10px] h-5 w-5 fill-current stroke-orange text-orange'
-                  >
-                    <g>
-                      <g>
-                        <polyline
-                          fill='none'
-                          points='.5 .5 2.7 .5 5.2 11 12.4 11 14.5 3.5 3.7 3.5'
-                          strokeLinecap='round'
-                          strokeLinejoin='round'
-                          strokeMiterlimit={10}
-                        />
-                        <circle cx={6} cy='13.5' r={1} stroke='none' />
-                        <circle cx='11.5' cy='13.5' r={1} stroke='none' />
-                      </g>
-                      <line fill='none' strokeLinecap='round' strokeMiterlimit={10} x1='7.5' x2='10.5' y1={7} y2={7} />
-                      <line fill='none' strokeLinecap='round' strokeMiterlimit={10} x1={9} x2={9} y1='8.5' y2='5.5' />
-                    </g>
-                  </svg>
+                  <CartIcon className='mr-[10px] h-5 w-5  stroke-orange text-orange' />
                   Thêm vào giỏ hàng
                 </button>
                 <button className='fkex ml-4 h-12 min-w-[5rem] items-center justify-center rounded-sm bg-orange px-5 capitalize text-white shadow-sm outline-none hover:bg-orange/90'>
@@ -166,8 +152,8 @@ export default function ProductDetail() {
           </div>
         </div>
       </div>
-      <div className='p-4 mt-8 bg-white shadow'>
-        <div className='container'>
+      <div className='container'>
+        <div className='p-4 mt-8 bg-white rounded-lg shadow'>
           <div className='p-4 text-lg capitalize rounded bg-gray-50 text-slate-700'>Mô tả sản phẩm</div>
           <div className='mx-4 mt-12 mb-4 text-sm leading-loose'>
             <div
