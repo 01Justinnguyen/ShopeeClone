@@ -10,7 +10,7 @@ import ChevronRight from '@/assets/chevron-right.svg?react'
 import CartIcon from '@/assets/cart-icon.svg?react'
 import MinusIcon from '@/assets/minus-icon.svg?react'
 import PlusIcon from '@/assets/plus-icon.svg?react'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Product } from '@/types/product.type'
 
 export default function ProductDetail() {
@@ -23,6 +23,8 @@ export default function ProductDetail() {
   const [currentIndexImages, setCurrentIndexImages] = useState<number[]>([0, 5])
   const [activeImage, setActiveImage] = useState<string>('')
   const product = productDetailData?.data.data
+
+  const imageRef = useRef<HTMLImageElement>(null)
 
   const currentImages = useMemo(
     () => (product ? product.images.slice(...currentIndexImages) : []),
@@ -51,6 +53,31 @@ export default function ProductDetail() {
     setActiveImage(img)
   }
 
+  const handleZoom = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    e.stopPropagation()
+    const rect = e.currentTarget.getBoundingClientRect()
+    const image = imageRef.current as HTMLImageElement
+    const { naturalHeight, naturalWidth } = image
+    // Cách 1: Lấy offsetX, offsetY đơn giản khi chúng ta đã xử lý được bubble event
+    // const { offsetX, offsetY } = e.nativeEvent
+
+    // Cách 2: Lấy offsetX, offsetY khi chúng ta không xử lý được bubble event không cần pointer-events: none;
+    const offsetX = e.pageX - (rect.x + window.scrollX)
+    const offsetY = e.pageY - (rect.y + window.scrollY)
+
+    const top = offsetY * (1 - naturalHeight / rect.height)
+    const left = offsetX * (1 - naturalWidth / rect.width)
+    image.style.width = naturalWidth + 'px'
+    image.style.height = naturalHeight + 'px'
+    image.style.maxWidth = 'unset'
+    image.style.top = top + 'px'
+    image.style.left = left + 'px'
+  }
+
+  const handleRemoveZoom = () => {
+    imageRef.current?.removeAttribute('style')
+  }
+
   if (!product) return null
   return (
     <div className='py-6 bg-gray-200'>
@@ -58,11 +85,16 @@ export default function ProductDetail() {
         <div className='p-4 bg-white rounded-lg shadow'>
           <div className='grid grid-cols-12 gap-9'>
             <div className='col-span-5'>
-              <div className='relative w-full pt-[100%] shadow'>
+              <div
+                className='relative w-full pt-[100%] shadow overflow-hidden hover:cursor-zoom-in'
+                onMouseMove={handleZoom}
+                onMouseLeave={handleRemoveZoom}
+              >
                 <img
                   src={activeImage}
                   alt={product.name}
-                  className='absolute top-0 left-0 object-cover w-full h-full bg-white'
+                  className='absolute top-0 left-0 object-cover w-full h-full bg-white '
+                  ref={imageRef}
                 />
               </div>
               <div className='relative grid grid-cols-5 gap-1 mt-4'>

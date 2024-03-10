@@ -72,6 +72,7 @@
 const path = require('path')
 
 module.exports = {
+  extends: 'react-app',
   extends: [
     // Chúng ta sẽ dùng các rule mặc định từ các plugin mà chúng ta đã cài.
     'eslint:recommended',
@@ -109,7 +110,12 @@ module.exports = {
   env: {
     node: true
   },
+  eslintConfig: {
+    extends: 'react-app'
+  },
   rules: {
+    'react-hooks/rules-of-hooks': 'error',
+    'react-hooks/exhaustive-deps': 'warn',
     // Tắt rule yêu cầu import React trong file jsx
     'react/react-in-jsx-scope': 'off',
     // Cảnh báo khi thẻ <a target='_blank'> mà không có rel="noreferrer"

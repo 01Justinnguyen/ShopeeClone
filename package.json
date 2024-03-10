@@ -23,6 +23,7 @@
     "axios": "^1.6.7",
     "classnames": "^2.5.1",
     "dompurify": "^3.0.9",
+    "eslint-config-react-app": "^7.0.1",
     "eslint-import-resolver-alias": "^1.1.2",
     "eslint-import-resolver-typescript": "^3.6.1",
     "framer-motion": "^11.0.5",
