@@ -1,5 +1,5 @@
 /* eslint-disable import/no-unresolved */
-import { Link } from 'react-router-dom'
+import { Link, createSearchParams, useNavigate } from 'react-router-dom'
 import CartLogo from '@/assets/cart-logo.svg?react'
 import FindIcon from '@/assets/find-icon.svg?react'
 import FaceBookLogo from '@/assets/logo-facebook.svg?react'
@@ -15,9 +15,27 @@ import { useMutation } from '@tanstack/react-query'
 import path from '@/constants/path'
 import Button from '../Button'
 import AuthApi from '@/api/auth.api'
+import useQueryConfig from '@/hooks/useQueryConfig'
+import { useForm } from 'react-hook-form'
+import { Schema, schema } from '@/utils/rules'
+import { yupResolver } from '@hookform/resolvers/yup'
+import { omit } from 'lodash'
+
+type FormData = Pick<Schema, 'name'>
+
+const nameSchema = schema.pick(['name'])
 
 export default function Header() {
+  const navigate = useNavigate()
   const { isAuthenticated, setIsAuthenticated, profile, setProfile } = useAppContext()
+  const { handleSubmit, register } = useForm<FormData>({
+    defaultValues: {
+      name: ''
+    },
+    resolver: yupResolver(nameSchema)
+  })
+  const queryConfig = useQueryConfig()
+  console.log('🐻 ~ Header ~ queryConfig:', queryConfig)
 
   const logoutMutation = useMutation({
     mutationFn: AuthApi.logout,
@@ -31,6 +49,26 @@ export default function Header() {
   const handleLogout = () => {
     logoutMutation.mutate()
   }
+
+  const onSubmitSearch = handleSubmit((value) => {
+    const config = queryConfig.order
+      ? omit(
+          {
+            ...queryConfig,
+            name: value.name
+          },
+          ['order', 'sort_by']
+        )
+      : {
+          ...queryConfig,
+          name: value.name
+        }
+
+    navigate({
+      pathname: path.home,
+      search: createSearchParams(config).toString()
+    })
+  })
 
   return (
     <div className='pt-2 pb-5 bg-[linear-gradient(-180deg,#f53d2d,#f63)] text-white'>
@@ -130,13 +168,13 @@ export default function Header() {
           <Link to={path.home} className='col-span-2'>
             <Logo className='h-7 lg:h-11 fill-white' />
           </Link>
-          <form className='col-span-9'>
+          <form className='col-span-9' onSubmit={onSubmitSearch}>
             <div className='flex p-1 bg-white rounded-sm'>
               <input
                 type='text'
-                name='search'
                 className='flex-grow px-3 py-2 text-sm text-black bg-transparent border-none outline-none'
                 placeholder='Shopee bao ship 0Đ - Đăng ký ngay!'
+                {...register('name')}
               />
               <Link to={path.home} className='flex-shrink-0 px-6 py-2 rounded-sm bg-orange hover:bg-orange/90'>
                 <FindIcon className='w-4 h-4' />

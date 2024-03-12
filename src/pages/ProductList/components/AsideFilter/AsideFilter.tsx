@@ -1,7 +1,6 @@
 import Button from '@/components/Button'
 import path from '@/constants/path'
 import { Link, createSearchParams, useNavigate } from 'react-router-dom'
-import { QueryConfig } from '../../ProductList'
 import { Category } from '@/types/category.type'
 import classNames from 'classnames'
 import InputNumber from '@/components/Input/InputNumber'
@@ -12,6 +11,7 @@ import { NoUndefinedField } from '@/types/utils.types'
 import { ObjectSchema } from 'yup'
 import RatingStars from './RatingStars'
 import { omit } from 'lodash'
+import { QueryConfig } from '@/hooks/useQueryConfig'
 
 interface AsideFilterProps {
   queryConfig: QueryConfig

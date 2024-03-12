@@ -9,28 +9,10 @@ import Product from './components/Product'
 import SortProductList from './components/SortProductList'
 import Pagination from '@/components/Pagination/Pagination'
 import CategoryApi from '@/api/category.api'
-
-export type QueryConfig = {
-  [key in keyof ProductListConfig]: string
-}
+import useQueryConfig from '@/hooks/useQueryConfig'
 
 export default function ProductList() {
-  const queryParams: QueryConfig = useQueryParams()
-  const queryConfig: QueryConfig = omitBy(
-    {
-      page: queryParams.page || '1',
-      limit: queryParams.limit || '6',
-      sort_by: queryParams.sort_by,
-      exclude: queryParams.exclude,
-      name: queryParams.name,
-      order: queryParams.order,
-      category: queryParams.category,
-      price_max: queryParams.price_max,
-      price_min: queryParams.price_min,
-      rating_filter: queryParams.rating_filter
-    },
-    isUndefined
-  )
+  const queryConfig = useQueryConfig()
 
   const { data: ProductData } = useQuery({
     queryKey: ['product', queryConfig],
@@ -47,7 +29,7 @@ export default function ProductList() {
   return (
     <div className='py-6 bg-gray-200'>
       <div className='container'>
-        {ProductData && (
+        {ProductData ? (
           <div className='grid grid-cols-12 gap-6'>
             <div className='col-span-3'>
               <AsideFilter
@@ -76,6 +58,8 @@ export default function ProductList() {
               />
             </div>
           </div>
+        ) : (
+          <div className='text-xl text-slate-400'>Không tìm thấy sản phẩm nào</div>
         )}
       </div>
     </div>
