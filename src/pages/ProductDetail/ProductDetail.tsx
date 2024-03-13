@@ -10,8 +10,9 @@ import ChevronRight from '@/assets/chevron-right.svg?react'
 import CartIcon from '@/assets/cart-icon.svg?react'
 import MinusIcon from '@/assets/minus-icon.svg?react'
 import PlusIcon from '@/assets/plus-icon.svg?react'
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { Product } from '@/types/product.type'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { Product as ProductType, ProductListConfig } from '@/types/product.type'
+import Product from '../ProductList/components/Product'
 
 export default function ProductDetail() {
   const { nameId } = useParams()
@@ -32,6 +33,16 @@ export default function ProductDetail() {
     [product, currentIndexImages]
   )
 
+  const queryConfig: ProductListConfig = { limit: '6', page: '1', category: product?.category._id }
+
+  const { data: ProductData } = useQuery({
+    queryKey: ['product', queryConfig],
+    queryFn: () => ProductApi.getProducts(queryConfig),
+    enabled: Boolean(product),
+    staleTime: 3 * 60 * 1000
+  })
+  console.log('🐻 ~ ProductDetail ~ ProductData:', ProductData)
+
   useEffect(() => {
     if (product && product.images.length > 0) {
       setActiveImage(product.images[0])
@@ -39,7 +50,7 @@ export default function ProductDetail() {
   }, [product])
 
   const next = () => {
-    if (currentIndexImages[1] < (product as Product).images.length) {
+    if (currentIndexImages[1] < (product as ProductType).images.length) {
       setCurrentIndexImages((prev) => [prev[0] + 1, prev[1] + 1])
     }
   }
@@ -185,15 +196,33 @@ export default function ProductDetail() {
           </div>
         </div>
       </div>
-      <div className='container'>
-        <div className='p-4 mt-8 bg-white rounded-lg shadow'>
-          <div className='p-4 text-lg capitalize rounded bg-gray-50 text-slate-700'>Mô tả sản phẩm</div>
-          <div className='mx-4 mt-12 mb-4 text-sm leading-loose'>
-            <div
-              dangerouslySetInnerHTML={{
-                __html: DOMPurify.sanitize(product.description)
-              }}
-            />
+      <div className='mt-8'>
+        <div className='container'>
+          <div className='p-4 mt-8 bg-white rounded-lg shadow'>
+            <div className='p-4 text-lg capitalize rounded bg-gray-50 text-slate-700'>Mô tả sản phẩm</div>
+            <div className='mx-4 mt-12 mb-4 text-sm leading-loose'>
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: DOMPurify.sanitize(product.description)
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className='mt-8'>
+        <div className='container'>
+          <div className='text-gray-400 uppercase'>CÓ THỂ BẠN CŨNG THÍCH</div>
+          <div className='grid grid-cols-2 gap-3 mt-6 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6'>
+            {React.Children.toArray(
+              ProductData &&
+                ProductData.data.data.products.map((product) => (
+                  <div className='col-span-1'>
+                    <Product product={product} />
+                  </div>
+                ))
+            )}
           </div>
         </div>
       </div>

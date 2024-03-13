@@ -1,8 +1,8 @@
-import path from '@/constants/path'
-import { QueryConfig } from '@/pages/ProductList/ProductList'
 import { useCallback, useEffect, useState } from 'react'
 import ReactPaginate from 'react-paginate'
 import { createSearchParams, useNavigate } from 'react-router-dom'
+import { QueryConfig } from '@/hooks/useQueryConfig'
+import path from '@/constants/path'
 import './style.css'
 
 interface PaginationProps {

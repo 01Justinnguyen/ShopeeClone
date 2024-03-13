@@ -35,7 +35,6 @@ export default function Header() {
     resolver: yupResolver(nameSchema)
   })
   const queryConfig = useQueryConfig()
-  console.log('🐻 ~ Header ~ queryConfig:', queryConfig)
 
   const logoutMutation = useMutation({
     mutationFn: AuthApi.logout,
