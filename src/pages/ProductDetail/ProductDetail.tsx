@@ -1,5 +1,4 @@
 import ProductApi from '@/api/product.api'
-import InputNumber from '@/components/Input/InputNumber'
 import ProductRating from '@/components/ProductRating'
 import { formatCurrency, formatNumberToSocialStyle, getIdFromNameId, rateSale } from '@/utils/utils'
 import { useQuery } from '@tanstack/react-query'
@@ -8,13 +7,14 @@ import { useParams } from 'react-router-dom'
 import ChevronLeft from '@/assets/chevron-left.svg?react'
 import ChevronRight from '@/assets/chevron-right.svg?react'
 import CartIcon from '@/assets/cart-icon.svg?react'
-import MinusIcon from '@/assets/minus-icon.svg?react'
-import PlusIcon from '@/assets/plus-icon.svg?react'
+
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Product as ProductType, ProductListConfig } from '@/types/product.type'
 import Product from '../ProductList/components/Product'
+import QuantityController from '@/components/Input/QuantityController'
 
 export default function ProductDetail() {
+  const [buyCount, setBuyCount] = useState<number>(1)
   const { nameId } = useParams()
   const id = getIdFromNameId(nameId as string)
   const { data: productDetailData } = useQuery({
@@ -88,6 +88,10 @@ export default function ProductDetail() {
 
   const handleRemoveZoom = () => {
     imageRef.current?.removeAttribute('style')
+  }
+
+  const handleBuyCount = (value: number) => {
+    setBuyCount(value)
   }
 
   if (!product) return null
@@ -167,20 +171,15 @@ export default function ProductDetail() {
               </div>
               <div className='flex items-center mt-8'>
                 <div className='text-gray-500 capitalize'>Số lượng</div>
-                <div className='flex items-center ml-10'>
-                  <button className='flex items-center justify-center w-8 h-8 text-gray-600 border border-gray-300 rounded-l-sm'>
-                    <MinusIcon className='w-4 h-4' />
-                  </button>
-                  <InputNumber
-                    value={1}
-                    className=''
-                    classNameErrors='hidden'
-                    classNameInput='h-8 w-14 border-t border-b border-gray-300 p-1 text-center outline-none'
-                  />
-                  <button className='flex items-center justify-center w-8 h-8 text-gray-600 border border-gray-300 rounded-r-sm'>
-                    <PlusIcon className='w-4 h-4' />
-                  </button>
-                </div>
+
+                <QuantityController
+                  onDecrease={handleBuyCount}
+                  onIncrease={handleBuyCount}
+                  onTyping={handleBuyCount}
+                  value={buyCount}
+                  max={product.quantity}
+                />
+
                 <div className='ml-6 text-sm text-gray-500'>{product.quantity} sản phẩm có sẵn</div>
               </div>
               <div className='flex items-center mt-8'>
