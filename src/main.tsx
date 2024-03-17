@@ -9,7 +9,7 @@ import App from './App.tsx'
 import { AppContextProvider } from './contexts/app.context.tsx'
 import './index.css'
 
-const queryClient = new QueryClient({
+export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false, // default: true
@@ -29,7 +29,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <ReactQueryDevtools initialIsOpen={false} buttonPosition='bottom-left' />
       <ToastContainer
         position='top-right'
-        autoClose={2000}
+        autoClose={1800}
         hideProgressBar={false}
         newestOnTop={false}
         closeOnClick

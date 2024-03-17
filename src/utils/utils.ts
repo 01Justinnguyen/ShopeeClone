@@ -53,3 +53,7 @@ export const getIdFromNameId = (nameId: string) => {
   const arr = nameId.split('-i-')
   return arr[arr.length - 1]
 }
+
+export const sliceTitle = ({ title, length }: { title: string; length: number }) => {
+  return title.slice(0, length) + ' …'
+}

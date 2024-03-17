@@ -10,7 +10,7 @@ import ArrowDown from '@/assets/arrow-down.svg?react'
 import Popover from '../Popover'
 import { useAppContext } from '@/contexts/app.context'
 import { toast } from 'react-toastify'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 
 import path from '@/constants/path'
 import Button from '../Button'
@@ -20,10 +20,14 @@ import { useForm } from 'react-hook-form'
 import { Schema, schema } from '@/utils/rules'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { omit } from 'lodash'
+import { purchasesStatus } from '@/constants/purchase'
+import purchaseAPi from '@/api/purchase.api'
+import { formatCurrency, sliceTitle } from '@/utils/utils'
 
 type FormData = Pick<Schema, 'name'>
 
 const nameSchema = schema.pick(['name'])
+const MAX_PRODUCT = 5
 
 export default function Header() {
   const navigate = useNavigate()
@@ -44,6 +48,13 @@ export default function Header() {
       toast.success('Đã đăng xuất')
     }
   })
+
+  const { data: purchasesInCartData } = useQuery({
+    queryKey: ['purchases', { status: purchasesStatus.inCart }],
+    queryFn: () => purchaseAPi.getPurchasesList({ status: purchasesStatus.inCart })
+  })
+
+  const purchasesIncart = purchasesInCartData?.data.data
 
   const handleLogout = () => {
     logoutMutation.mutate()
@@ -183,55 +194,40 @@ export default function Header() {
           <Popover
             className='items-end col-span-1 text-center'
             renderPopoverParent={
-              <Link to={path.cart} className='inline-block '>
+              <Link to={path.cart} className='relative inline-block'>
                 <CartLogo className='w-7 h-7' />
+                <span className='absolute -top-[6px] left-[14px] px-2 py-[2px] text-[10px] bg-white rounded-full text-orange border border-[#ee4d2d]'>
+                  {purchasesIncart?.length}
+                </span>
               </Link>
             }
           >
-            {isAuthenticated ? (
+            {isAuthenticated && purchasesIncart ? (
               <div className='relative text-xs bg-white border-gray-200 border-none rounded-sm shadow-md'>
                 <>
                   <div className='flex items-center text-gray-400 h-10 pl-[10px] capitalize'>Sản Phẩm Mới Thêm</div>
                   <div className=''>
-                    <Link to={'/'} className='flex p-[10px] cursor-pointer hover:bg-slate-100'>
-                      <div className='flex-shrink-0'>
-                        <img
-                          src='https://avatars.githubusercontent.com/u/87435674?v=4'
-                          alt='product'
-                          className='object-cover w-10 h-10'
-                        />
-                      </div>
-                      <div className='flex-grow ml-2 overflow-hidden'>
-                        <div className='truncate'>
-                          Beam Transporter GFT60T3B106-13 Bộ giảm tốc hành trình-GFT60T3B106-15 trình
+                    {purchasesIncart.slice(0, MAX_PRODUCT).map((productItem) => (
+                      <Link key={productItem._id} to={'/'} className='flex p-[10px] cursor-pointer hover:bg-slate-100'>
+                        <div className='flex-shrink-0'>
+                          <img src={productItem.product.image} alt='product' className='object-cover w-10 h-10' />
                         </div>
-                        <span className='text-sm text-gray-400'>x2</span>
-                      </div>
-
-                      <div className='flex-shrink-0 ml-2'>
-                        <span className='text-orange'>₫115.709.000</span>
-                      </div>
-                    </Link>
-                    <div className='flex p-[10px] cursor-pointer hover:bg-slate-100'>
-                      <div className='flex-shrink-0'>
-                        <img
-                          src='https://avatars.githubusercontent.com/u/87435674?v=4'
-                          alt='product'
-                          className='object-cover w-10 h-10'
-                        />
-                      </div>
-                      <div className='flex-grow ml-2 overflow-hidden'>
-                        <div className='truncate'>
-                          Beam Transporter GFT60T3B106-13 Bộ giảm tốc hành trình-GFT60T3B106-15 trình
+                        <div className='flex-grow ml-2 overflow-hidden'>
+                          <div className='truncate'>
+                            {sliceTitle({
+                              title: productItem.product.name,
+                              length: 40
+                            })}
+                          </div>
+                          <span className='text-sm text-gray-400'>x{productItem.buy_count}</span>
                         </div>
-                        <span className='text-sm text-gray-400'>x2</span>
-                      </div>
 
-                      <div className='flex-shrink-0 ml-2'>
-                        <span className='text-orange'>₫115.709.000</span>
-                      </div>
-                    </div>
-                    <div className='flex p-[10px] cursor-pointer hover:bg-slate-100'>
+                        <div className='flex-shrink-0 ml-2'>
+                          <span className='text-orange'>₫{formatCurrency(productItem.product.price)}</span>
+                        </div>
+                      </Link>
+                    ))}
+                    {/* <div className='flex p-[10px] cursor-pointer hover:bg-slate-100'>
                       <div className='flex-shrink-0'>
                         <img
                           src='https://avatars.githubusercontent.com/u/87435674?v=4'
@@ -288,10 +284,30 @@ export default function Header() {
                         <span className='text-orange'>₫115.709.000</span>
                       </div>
                     </div>
+                    <div className='flex p-[10px] cursor-pointer hover:bg-slate-100'>
+                      <div className='flex-shrink-0'>
+                        <img
+                          src='https://avatars.githubusercontent.com/u/87435674?v=4'
+                          alt='product'
+                          className='object-cover w-10 h-10'
+                        />
+                      </div>
+                      <div className='flex-grow ml-2 overflow-hidden'>
+                        <div className='truncate'>
+                          Beam Transporter GFT60T3B106-13 Bộ giảm tốc hành trình-GFT60T3B106-15 trình
+                        </div>
+                        <span className='text-sm text-gray-400'>x2</span>
+                      </div>
+
+                      <div className='flex-shrink-0 ml-2'>
+                        <span className='text-orange'>₫115.709.000</span>
+                      </div>
+                    </div> */}
                   </div>
                   <div className='flex items-center justify-between mt-6 px-[10px] pb-[10px]'>
                     <div className='text-xs text-gray-400 capitalize'>
-                      <span>28</span> Thêm vào giỏ hàng
+                      <span>{purchasesIncart.length > MAX_PRODUCT ? purchasesIncart.length - MAX_PRODUCT : ''}</span>{' '}
+                      Thêm vào giỏ hàng
                     </div>
                     <button className='hover:opacity-95 transition-all py-2 text-white capitalize px-[15px] bg-orange'>
                       Xem giỏ hàng
