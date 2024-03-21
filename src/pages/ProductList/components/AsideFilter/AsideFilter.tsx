@@ -12,6 +12,7 @@ import { ObjectSchema } from 'yup'
 import RatingStars from './RatingStars'
 import { omit } from 'lodash'
 import { QueryConfig } from '@/hooks/useQueryConfig'
+import InputV2 from '@/components/InputV2'
 
 interface AsideFilterProps {
   queryConfig: QueryConfig
@@ -135,7 +136,7 @@ export default function AsideFilter({ categoriesData, queryConfig }: AsideFilter
         <div>Khoản giá</div>
         <form className='mt-2' onSubmit={onSubmit}>
           <div className='flex items-start'>
-            <Controller
+            {/* <Controller
               control={control}
               name='price_min'
               render={({ field }) => {
@@ -153,6 +154,19 @@ export default function AsideFilter({ categoriesData, queryConfig }: AsideFilter
                     }}
                   />
                 )
+              }}
+            /> */}
+
+            <InputV2
+              control={control}
+              name='price_min'
+              type='number'
+              className='grow'
+              placeholder='₫ ĐẾN'
+              classNameInput='p-1 w-full outline-none border border-gray-300 focus:border-gray-500 rounded-sm focus:shadow-sm'
+              classNameErrors='hidden'
+              onChange={() => {
+                trigger('price_min')
               }}
             />
 
