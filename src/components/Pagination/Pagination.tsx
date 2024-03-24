@@ -12,7 +12,6 @@ interface PaginationProps {
 export default function Pagination({ queryConfig, pageSize }: PaginationProps) {
   const navigate = useNavigate()
   const { page } = queryConfig
-  console.log('🐻 ~ Pagination ~ page:', page)
   const [_, setItemOffset] = useState(0)
   const [pageCount, setPageCount] = useState<number>(0)
 

@@ -5,10 +5,11 @@ import path from '@/constants/path'
 import { purchasesStatus } from '@/constants/purchase'
 import { Purchase } from '@/types/puchase.type'
 import { formatCurrency, generateNameId } from '@/utils/utils'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { produce } from 'immer'
+import { keyBy } from 'lodash'
 
 interface ExtendedPurchase extends Purchase {
   disabled: boolean
@@ -17,26 +18,36 @@ interface ExtendedPurchase extends Purchase {
 
 function Cart() {
   const [extendedPurchases, setExtendedPurchases] = useState<ExtendedPurchase[]>([])
-  const { data: purchasesInCartData } = useQuery({
+  const { data: purchasesInCartData, refetch } = useQuery({
     queryKey: ['purchases', { status: purchasesStatus.inCart }],
     queryFn: () => purchaseAPi.getPurchasesList({ status: purchasesStatus.inCart })
   })
+  const updatePurchaseMutation = useMutation({
+    mutationFn: purchaseAPi.updatePurchase,
+    onSuccess: () => {
+      refetch()
+    }
+  })
+
   const purchasesIncart = purchasesInCartData?.data.data
   const isAllChecked = extendedPurchases.every((product) => product.checked === true)
   useEffect(() => {
-    setExtendedPurchases(
-      purchasesIncart?.map((purchase) => ({
-        ...purchase,
-        disabled: false,
-        checked: false
-      })) || []
-    )
+    setExtendedPurchases((prev) => {
+      const extendedPurchasesObject = keyBy(prev, '_id')
+      return (
+        purchasesIncart?.map((purchase) => ({
+          ...purchase,
+          disabled: false,
+          checked: Boolean(extendedPurchasesObject[purchase._id]?.checked)
+        })) || []
+      )
+    })
   }, [purchasesIncart])
 
-  const handleChecked = (prodcutIndex: number) => (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChecked = (purchaseIndex: number) => (event: React.ChangeEvent<HTMLInputElement>) => {
     setExtendedPurchases(
       produce((draft) => {
-        draft[prodcutIndex].checked = event.target.checked
+        draft[purchaseIndex].checked = event.target.checked
       })
     )
   }
@@ -49,6 +60,31 @@ function Cart() {
       }))
     )
   }
+
+  const handleTypeQuantity = (purchaseIndex: number) => (value: number) => {
+    setExtendedPurchases(
+      produce((draft) => {
+        draft[purchaseIndex].buy_count = value
+      })
+    )
+  }
+
+  const handleQuantity = (purchaseIndex: number, value: number, enable: boolean) => {
+    if (enable) {
+      const purchase = extendedPurchases[purchaseIndex]
+      setExtendedPurchases(
+        produce((draft) => {
+          draft[purchaseIndex].disabled = true
+        })
+      )
+
+      updatePurchaseMutation.mutate({
+        product_id: purchase.product._id,
+        buy_count: value
+      })
+    }
+  }
+
   return (
     <div className='py-16 bg-neutral-100 '>
       <div className='container'>
@@ -132,6 +168,19 @@ function Cart() {
                           max={purchase.product.quantity}
                           value={purchase.buy_count}
                           wrapClassName='flex items-center'
+                          onIncrease={(value) => handleQuantity(idx, value, value <= purchase.product.quantity)}
+                          onDecrease={(value) => handleQuantity(idx, value, value >= 1)}
+                          onTyping={handleTypeQuantity(idx)}
+                          onFocusOut={(value) =>
+                            handleQuantity(
+                              idx,
+                              value,
+                              value >= 1 &&
+                                value <= purchase.product.quantity &&
+                                value !== (purchasesIncart as Purchase[])[idx].buy_count
+                            )
+                          }
+                          disabled={purchase.disabled}
                         />
                       </div>
                       <div className='col-span-1'>
