@@ -1,8 +1,6 @@
 import ProductApi from '@/api/product.api'
-import useQueryParams from '@/hooks/useQueryParams'
 import { ProductListConfig } from '@/types/product.type'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
-import { isUndefined, omitBy } from 'lodash'
 import React from 'react'
 import AsideFilter from './components/AsideFilter'
 import Product from './components/Product'

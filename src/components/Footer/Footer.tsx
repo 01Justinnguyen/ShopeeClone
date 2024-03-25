@@ -1,6 +1,6 @@
 export default function Footer() {
   return (
-    <div className='py-16 bg-neutral-100'>
+    <div className='py-16 border-t-4 bg-neutral-100 border-t-orange'>
       <div className='container'>
         <div className='grid grid-cols-1 gap-4 lg:grid-cols-3'>
           <div className='lg:col-span-1'>© 2024 Shopee. Tất cả các quyền được bảo lưu.</div>
