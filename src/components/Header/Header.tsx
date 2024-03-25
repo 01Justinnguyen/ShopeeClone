@@ -209,7 +209,7 @@ export default function Header() {
               </Link>
             }
           >
-            {isAuthenticated && purchasesIncart ? (
+            {isAuthenticated && purchasesIncart && purchasesIncart.length > 0 ? (
               <div className='relative text-xs bg-white border-gray-200 border-none rounded-sm shadow-md'>
                 <>
                   <div className='flex items-center text-gray-400 h-10 pl-[10px] capitalize'>Sản Phẩm Mới Thêm</div>
@@ -251,13 +251,7 @@ export default function Header() {
               </div>
             ) : (
               <div className='text-center min-w-[400px] bg-white py-[100px] shadow-lg rounded-sm border-none'>
-                <div
-                  className='inline-block w-[100px] h-[100px] bg-cover bg-center bg-no-repeat '
-                  style={{
-                    backgroundImage:
-                      'url("https://deo.shopeemobile.com/shopee/shopee-pcmall-live-sg/assets/9bdd8040b334d31946f49e36beaf32db.png")'
-                  }}
-                ></div>
+                <div className='bg-emptyCart inline-block w-[100px] h-[100px] bg-cover bg-center bg-no-repeat'></div>
                 <h3 className='font-normal'>Chưa có sản phẩm</h3>
               </div>
             )}
