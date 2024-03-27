@@ -3,11 +3,10 @@ import ProductRating from '@/components/ProductRating'
 import { formatCurrency, formatNumberToSocialStyle, getIdFromNameId, rateSale } from '@/utils/utils'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import DOMPurify from 'dompurify'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import ChevronLeft from '@/assets/chevron-left.svg?react'
 import ChevronRight from '@/assets/chevron-right.svg?react'
 import CartIcon from '@/assets/cart-icon.svg?react'
-
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Product as ProductType, ProductListConfig } from '@/types/product.type'
 import Product from '../ProductList/components/Product'
@@ -17,8 +16,10 @@ import { AddToCartType } from '@/types/puchase.type'
 import { queryClient } from '@/main'
 import { purchasesStatus } from '@/constants/purchase'
 import { toast } from 'react-toastify'
+import path from '@/constants/path'
 
 export default function ProductDetail() {
+  const navigate = useNavigate()
   const [buyCount, setBuyCount] = useState<number>(1)
   const { nameId } = useParams()
   const id = getIdFromNameId(nameId as string)
@@ -118,6 +119,16 @@ export default function ProductDetail() {
     )
   }
 
+  const buyNow = async () => {
+    const response = await addToCartMutation.mutateAsync({ buy_count: buyCount, product_id: product?._id as string })
+    const purchase = response.data.data
+    navigate(path.cart, {
+      state: {
+        purchaseId: purchase._id
+      }
+    })
+  }
+
   if (!product) return null
   return (
     <div className='py-6 bg-gray-200'>
@@ -214,7 +225,10 @@ export default function ProductDetail() {
                   <CartIcon className='mr-[10px] h-5 w-5  stroke-orange text-orange' />
                   Thêm vào giỏ hàng
                 </button>
-                <button className='fkex ml-4 h-12 min-w-[5rem] items-center justify-center rounded-sm bg-orange px-5 capitalize text-white shadow-sm outline-none hover:bg-orange/90'>
+                <button
+                  onClick={buyNow}
+                  className='fkex ml-4 h-12 min-w-[5rem] items-center justify-center rounded-sm bg-orange px-5 capitalize text-white shadow-sm outline-none hover:bg-orange/90'
+                >
                   Mua ngay
                 </button>
               </div>

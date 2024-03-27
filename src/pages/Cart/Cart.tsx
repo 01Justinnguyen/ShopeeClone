@@ -6,20 +6,17 @@ import { purchasesStatus } from '@/constants/purchase'
 import { Purchase } from '@/types/puchase.type'
 import { formatCurrency, generateNameId } from '@/utils/utils'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useEffect, useMemo, useState } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { produce } from 'immer'
 import { keyBy } from 'lodash'
 import { toast } from 'react-toastify'
-
-interface ExtendedPurchase extends Purchase {
-  disabled: boolean
-  checked: boolean
-}
+import { useAppContext } from '@/contexts/app.context'
 
 function Cart() {
+  const { extendedPurchases, setExtendedPurchases } = useAppContext()
   const navigate = useNavigate()
-  const [extendedPurchases, setExtendedPurchases] = useState<ExtendedPurchase[]>([])
+
   const { data: purchasesInCartData, refetch } = useQuery({
     queryKey: ['purchases', { status: purchasesStatus.inCart }],
     queryFn: () => purchaseAPi.getPurchasesList({ status: purchasesStatus.inCart })
@@ -45,30 +42,59 @@ function Cart() {
     }
   })
 
-  const purchasesIncart = purchasesInCartData?.data.data
-  const isAllChecked = extendedPurchases.every((product) => product.checked === true)
-  const checkedPurchases = extendedPurchases.filter((purchase) => purchase.checked)
-  const checkedPurchasesCount = checkedPurchases.length
-  const totalCheckedPurchasesPrice = checkedPurchases.reduce((result, current) => {
-    return result + current.product.price * current.buy_count
-  }, 0)
+  const location = useLocation()
+  console.log('🐻 ~ Cart ~ location:', location)
 
-  const totalCheckedPurchasesSavingPrice = checkedPurchases.reduce((result, current) => {
-    return result + (current.product.price_before_discount - current.product.price) * current.buy_count
-  }, 0)
+  // const choosenPurchaseIdFromLocation = (location.state as { purchaseId: string } | null)?.purchaseId
+
+  const [choosenPurchaseIdFromLocation, setChoosenPurchaseIdFromLocation] = useState<string | undefined>(
+    (location.state as { purchaseId: string } | null)?.purchaseId
+  )
+
+  const purchasesIncart = purchasesInCartData?.data.data
+  const isAllChecked = useMemo(
+    () => extendedPurchases.every((product) => product.checked === true),
+    [extendedPurchases]
+  )
+  const checkedPurchases = useMemo(() => extendedPurchases.filter((purchase) => purchase.checked), [extendedPurchases])
+  const checkedPurchasesCount = checkedPurchases.length
+  const totalCheckedPurchasesPrice = useMemo(
+    () =>
+      checkedPurchases.reduce((result, current) => {
+        return result + current.product.price_before_discount * current.buy_count
+      }, 0),
+    [checkedPurchases]
+  )
+
+  const totalCheckedPurchasesSavingPrice = useMemo(
+    () =>
+      checkedPurchases.reduce((result, current) => {
+        return result + (current.product.price_before_discount - current.product.price) * current.buy_count
+      }, 0),
+    [checkedPurchases]
+  )
 
   useEffect(() => {
     setExtendedPurchases((prev) => {
       const extendedPurchasesObject = keyBy(prev, '_id')
       return (
-        purchasesIncart?.map((purchase) => ({
-          ...purchase,
-          disabled: false,
-          checked: Boolean(extendedPurchasesObject[purchase._id]?.checked)
-        })) || []
+        purchasesIncart?.map((purchase) => {
+          const isChoosenPurchaseFromLocation = choosenPurchaseIdFromLocation === purchase._id
+          return {
+            ...purchase,
+            disabled: false,
+            checked: isChoosenPurchaseFromLocation || Boolean(extendedPurchasesObject[purchase._id]?.checked)
+          }
+        }) || []
       )
     })
-  }, [purchasesIncart])
+  }, [purchasesIncart, choosenPurchaseIdFromLocation])
+
+  useEffect(() => {
+    return () => {
+      history.replaceState(null, '')
+    }
+  }, [])
 
   const handleChecked = (purchaseIndex: number) => (event: React.ChangeEvent<HTMLInputElement>) => {
     setExtendedPurchases(
@@ -118,6 +144,10 @@ function Cart() {
 
   const handleDeleteManyPurchase = () => {
     const purchaseIds = checkedPurchases.map((purchase) => purchase._id)
+    if (purchaseIds.length < 1) {
+      toast.error('Bạn cần chọn sản phẩm')
+      return
+    }
     deletePurchaseMutation.mutate(purchaseIds)
   }
 
@@ -128,6 +158,9 @@ function Cart() {
         buy_count: purchase.buy_count
       }))
       buyPurchaseMutation.mutate(body)
+    } else {
+      toast.error('Bạn cần chọn sản phẩm')
+      return
     }
   }
 

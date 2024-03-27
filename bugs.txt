@@ -1,0 +1,3 @@
+bug navigation
+bug quantity product detail
+bug refresh page doesn't remove the state in history location
