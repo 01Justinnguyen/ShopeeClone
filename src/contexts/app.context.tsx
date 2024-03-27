@@ -32,6 +32,7 @@ const AppContextProvider = ({ children }: { children: React.ReactNode }) => {
   const reset = () => {
     setIsAuthenticated(false)
     setProfile(null)
+    setExtendedPurchases([])
   }
   const values = {
     isAuthenticated,

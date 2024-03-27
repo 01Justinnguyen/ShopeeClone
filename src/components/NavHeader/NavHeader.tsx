@@ -7,13 +7,13 @@ import ArrowDown from '@/assets/arrow-down.svg?react'
 import { useAppContext } from '@/contexts/app.context'
 import path from '@/constants/path'
 import Button from '@/components/Button'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import AuthApi from '@/api/auth.api'
 import { toast } from 'react-toastify'
-import { queryClient } from '@/main'
 import { purchasesStatus } from '@/constants/purchase'
 function NavHeader() {
   const { isAuthenticated, setIsAuthenticated, profile, setProfile } = useAppContext()
+  const queryClient = useQueryClient()
 
   const logoutMutation = useMutation({
     mutationFn: AuthApi.logout,

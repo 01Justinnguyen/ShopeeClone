@@ -69,27 +69,32 @@ class Http {
         // 3. Token hết hạn
 
         // Nếu lỗi 401
-        if (isAxiosUnauthorizedErrors(error)) {
-          const config = error.response && error.response.config
-          const url = config?.url
-          // Trường hợp Token hết hạn và request đó không phải là của request refresh_token thì chúng ta mới tiến hành gọi refresh-token
-          if (isAxiosExpiredTokenErrors(error) && url !== AUTH_URL.URL_REFRESH_TOKEN) {
-            this.refreshTokenRequest = this.refreshTokenRequest
-              ? this.refreshTokenRequest
-              : this.handleRefreshToken().finally(() => {
-                  this.refreshTokenRequest = null
-                })
-
-            return this.refreshTokenRequest.then((access_token) => {
-              if (config && config.headers) config.headers.Authorization = access_token
-              // Ý là chúng ta tiếp tục gọi lại request cũ vừa bị lỗi
-              return this.instante(config as any)
-            })
-          }
-          clearDataFromLS()
+        if (error.response?.status === HttpStatusCode.Unauthorized) {
           this.accessToken = ''
           this.refreshToken = ''
+          clearDataFromLS()
         }
+        // if (isAxiosUnauthorizedErrors(error)) {
+        //   const config = error.response && error.response.config
+        //   const url = config?.url
+        //   // Trường hợp Token hết hạn và request đó không phải là của request refresh_token thì chúng ta mới tiến hành gọi refresh-token
+        //   if (isAxiosExpiredTokenErrors(error) && url !== AUTH_URL.URL_REFRESH_TOKEN) {
+        //     this.refreshTokenRequest = this.refreshTokenRequest
+        //       ? this.refreshTokenRequest
+        //       : this.handleRefreshToken().finally(() => {
+        //           this.refreshTokenRequest = null
+        //         })
+
+        //     return this.refreshTokenRequest.then((access_token) => {
+        //       if (config && config.headers) config.headers.Authorization = access_token
+        //       // Ý là chúng ta tiếp tục gọi lại request cũ vừa bị lỗi
+        //       return this.instante(config as any)
+        //     })
+        //   }
+        //   clearDataFromLS()
+        //   this.accessToken = ''
+        //   this.refreshToken = ''
+        // }
         return Promise.reject(error)
       }
     )

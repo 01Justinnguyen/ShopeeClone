@@ -25,6 +25,11 @@ function RejectedRoute() {
 export default function useRouteElement() {
   const routeElement = useRoutes([
     {
+      path: '*',
+      index: true,
+      element: <PageNotFound />
+    },
+    {
       path: '',
       index: true,
       element: (
@@ -85,10 +90,6 @@ export default function useRouteElement() {
           )
         }
       ]
-    },
-    {
-      path: '*',
-      element: <PageNotFound />
     }
   ])
   return routeElement

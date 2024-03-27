@@ -1,7 +1,7 @@
 import ProductApi from '@/api/product.api'
 import ProductRating from '@/components/ProductRating'
 import { formatCurrency, formatNumberToSocialStyle, getIdFromNameId, rateSale } from '@/utils/utils'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import DOMPurify from 'dompurify'
 import { useNavigate, useParams } from 'react-router-dom'
 import ChevronLeft from '@/assets/chevron-left.svg?react'
@@ -13,13 +13,13 @@ import Product from '../ProductList/components/Product'
 import QuantityController from '@/components/Input/QuantityController'
 import purchaseAPi from '@/api/purchase.api'
 import { AddToCartType } from '@/types/puchase.type'
-import { queryClient } from '@/main'
 import { purchasesStatus } from '@/constants/purchase'
 import { toast } from 'react-toastify'
 import path from '@/constants/path'
 
 export default function ProductDetail() {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const [buyCount, setBuyCount] = useState<number>(1)
   const { nameId } = useParams()
   const id = getIdFromNameId(nameId as string)

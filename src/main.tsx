@@ -9,12 +9,11 @@ import App from './App.tsx'
 import { AppContextProvider } from './contexts/app.context.tsx'
 import './index.css'
 
-export const queryClient = new QueryClient({
+const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false, // default: true
-      // disabled retry default 3 times
-      retry: 0
+      retry: 0 // disabled retry default 3 times
     }
   }
 })
