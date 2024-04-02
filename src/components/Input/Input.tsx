@@ -4,7 +4,7 @@ import type { UseFormRegister } from 'react-hook-form'
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   errorMessage?: string
   className?: string
-  name: string
+  name?: string
   register?: UseFormRegister<any>
   classNameInput?: string
 }
